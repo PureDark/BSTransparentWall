@@ -13,6 +13,8 @@ namespace TransparentWall
 
         private void Start()
         {
+            if (!Plugin.IsTranparentWall)
+                return;
             try
             {
                 this._beatmapObjectSpawnController = Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().First();
@@ -53,8 +55,11 @@ namespace TransparentWall
         private IEnumerator<WaitForEndOfFrame> setupCamerasCoroutine()
         {
             yield return new WaitForEndOfFrame();
+
+            var mainGameSceneSetupData = Resources.FindObjectsOfTypeAll<MainGameSceneSetupData>().FirstOrDefault();
+
             Camera mainCamera = FindObjectsOfType<Camera>().FirstOrDefault(x => x.CompareTag("MainCamera"));
-            if (Plugin.IsHMDOn)
+            if (Plugin.IsHMDOn && !mainGameSceneSetupData.gameplayOptions.validForScoreUse)
                 mainCamera.cullingMask &= ~(1 << WallLayer);
             else
                 mainCamera.cullingMask |= (1 << WallLayer);
@@ -63,25 +68,27 @@ namespace TransparentWall
             {
                 if (plugin.Name == "CameraPlus" || plugin.Name == "CameraPlusOrbitEdition" || plugin.Name == "DynamicCamera")
                 {
-                    var _cameraPlus = ReflectionUtil.GetPrivateField<MonoBehaviour>(plugin, "_cameraPlus");
-                    if (_cameraPlus != null)
+                    MonoBehaviour _cameraPlus = ReflectionUtil.GetPrivateField<MonoBehaviour>(plugin, "_cameraPlus");
+                    while (_cameraPlus == null)
                     {
-                        Camera cam = ReflectionUtil.GetPrivateField<Camera>(_cameraPlus, "_cam");
-                        if (cam !=null)
-                        {
-                            if (((plugin.Name == "CameraPlus" || plugin.Name == "CameraPlusOrbitEdition") && Plugin.IsCameraPlusOn) || (plugin.Name == "DynamicCamera" && Plugin.IsDynamicCameraOn))
-                                cam.cullingMask &= ~(1 << WallLayer);
-                            else
-                                cam.cullingMask |= (1 << WallLayer);
-                        }
-                        Camera multi = ReflectionUtil.GetPrivateField<Camera>(_cameraPlus, "multi");
-                        if (multi != null)
-                        {
-                            if (Plugin.IsMutiViewFirstPersonOn)
-                                multi.cullingMask &= ~(1 << WallLayer);
-                            else
-                                multi.cullingMask |= (1 << WallLayer);
-                        }
+                        yield return new WaitForEndOfFrame();
+                        _cameraPlus = ReflectionUtil.GetPrivateField<MonoBehaviour>(plugin, "_cameraPlus");
+                    }
+                    Camera cam = ReflectionUtil.GetPrivateField<Camera>(_cameraPlus, "_cam");
+                    if (cam != null)
+                    {
+                        if (((plugin.Name == "CameraPlus" || plugin.Name == "CameraPlusOrbitEdition") && Plugin.IsCameraPlusOn) || (plugin.Name == "DynamicCamera" && Plugin.IsDynamicCameraOn))
+                            cam.cullingMask &= ~(1 << WallLayer);
+                        else
+                            cam.cullingMask |= (1 << WallLayer);
+                    }
+                    Camera multi = ReflectionUtil.GetPrivateField<Camera>(_cameraPlus, "multi");
+                    if (multi != null)
+                    {
+                        if (Plugin.IsMutiViewFirstPersonOn)
+                            multi.cullingMask &= ~(1 << WallLayer);
+                        else
+                            multi.cullingMask |= (1 << WallLayer);
                     }
                     break;
                 }
@@ -92,16 +99,13 @@ namespace TransparentWall
         {
             try
             {
-                if (Plugin.IsTranparentWall)
-                {
-                    StretchableObstacle _stretchableObstacle = ReflectionUtil.GetPrivateField<StretchableObstacle>(obstacleController, "_stretchableObstacle");
-                    StretchableCube _stretchableCoreOutside = ReflectionUtil.GetPrivateField<StretchableCube>(_stretchableObstacle, "_stretchableCoreOutside");
-                    StretchableCube _stretchableCoreInside = ReflectionUtil.GetPrivateField<StretchableCube>(_stretchableObstacle, "_stretchableCoreInside");
-                    MeshRenderer _meshRenderer = ReflectionUtil.GetPrivateField<MeshRenderer>(_stretchableCoreOutside, "_meshRenderer");
-                    MeshRenderer _meshRenderer2 = ReflectionUtil.GetPrivateField<MeshRenderer>(_stretchableCoreInside, "_meshRenderer");
-                    _stretchableCoreOutside.gameObject.layer = WallLayer;
-                    _stretchableCoreInside.gameObject.layer = WallLayer;
-                }
+                StretchableObstacle _stretchableObstacle = ReflectionUtil.GetPrivateField<StretchableObstacle>(obstacleController, "_stretchableObstacle");
+                StretchableCube _stretchableCoreOutside = ReflectionUtil.GetPrivateField<StretchableCube>(_stretchableObstacle, "_stretchableCoreOutside");
+                StretchableCube _stretchableCoreInside = ReflectionUtil.GetPrivateField<StretchableCube>(_stretchableObstacle, "_stretchableCoreInside");
+                //MeshRenderer _meshRenderer = ReflectionUtil.GetPrivateField<MeshRenderer>(_stretchableCoreOutside, "_meshRenderer");
+                //MeshRenderer _meshRenderer2 = ReflectionUtil.GetPrivateField<MeshRenderer>(_stretchableCoreInside, "_meshRenderer");
+                _stretchableCoreOutside.gameObject.layer = WallLayer;
+                _stretchableCoreInside.gameObject.layer = WallLayer;
             }
             catch (Exception ex)
             {

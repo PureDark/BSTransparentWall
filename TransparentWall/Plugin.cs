@@ -12,12 +12,14 @@ namespace TransparentWall
     class Plugin : IEnhancedPlugin, IPlugin
     {
         public static string PluginName = "TransparentWall";
-        public const string VersionNum = "0.1.0";
+        public const string VersionNum = "0.1.1";
 
         public string Name => PluginName;
         public string Version => VersionNum;
         public string[] Filter { get; }
-        
+
+        private static AsyncScenesLoader loader;
+
         public const string KeyTranparentWall = "TransparentWall";
         public const string KeyHMD = "HMD";
         public const string KeyCameraPlus = "CameraPlus";
@@ -111,13 +113,19 @@ namespace TransparentWall
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene scene)
         {
-            if (scene.buildIndex == 5)
+            if (scene.name == "StandardLevelLoader")
             {
-                new GameObject("TransparentWall").AddComponent<TransparentWall>();
+                if (!loader)
+                    loader = Resources.FindObjectsOfTypeAll<AsyncScenesLoader>().FirstOrDefault();
+                loader.loadingDidFinishEvent += OnLoadingDidFinish;
             }
         }
+        public void OnLoadingDidFinish()
+        {
+            new GameObject("TransparentWall").AddComponent<TransparentWall>();
+        }
 
-        public void OnLateUpdate()
+    public void OnLateUpdate()
         {
         }
 

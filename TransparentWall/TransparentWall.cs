@@ -8,8 +8,10 @@ namespace TransparentWall
     public class TransparentWall : MonoBehaviour
     {
         public static int WallLayer = 25;
+        public static string LIVCam_Name = "MainCamera";
 
         private BeatmapObjectSpawnController _beatmapObjectSpawnController;
+        private LIV.SDK.Unity.LIV _livObject;
 
         private void Start()
         {
@@ -17,7 +19,8 @@ namespace TransparentWall
                 return;
             try
             {
-                this._beatmapObjectSpawnController = Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().First();
+                if (Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().Count() > 0)
+                    this._beatmapObjectSpawnController = Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().First();
 
                 if (_beatmapObjectSpawnController != null)
                 {
@@ -41,25 +44,40 @@ namespace TransparentWall
         }
         private void setupCams()
         {
+            CullLiv(); // Probably pointless to do it here, but why not
+            StartCoroutine(setupCamerasCoroutine());
+        }
+
+        /// <summary>
+        /// Attempts to find the MixedRealityRender and apply the layer mask to the LIV output.
+        /// </summary>
+        public void CullLiv()
+        {
             if (Plugin.IsLIVCameraOn)
             {
-                Camera[] cameras = FindObjectsOfType<Camera>();
-                foreach (Camera camera in cameras)
+                LIV.SDK.Unity.LIV _liv = null;
+                LIV.SDK.Unity.MixedRealityRender mxdR = UnityEngine.Object.FindObjectOfType<LIV.SDK.Unity.MixedRealityRender>();
+                if (mxdR != null)
                 {
-                    camera.cullingMask &= ~(1 << WallLayer);
+                    _liv = ReflectionUtil.GetPrivateField<LIV.SDK.Unity.LIV>(mxdR, "_liv");
+                    if (_liv.name == LIVCam_Name)
+                    {
+                        _livObject = _liv;
+                        _livObject.SpectatorLayerMask &= ~(1 << WallLayer);
+                    }
                 }
             }
-            StartCoroutine(setupCamerasCoroutine());
         }
 
         private IEnumerator<WaitForEndOfFrame> setupCamerasCoroutine()
         {
             yield return new WaitForEndOfFrame();
 
-            var mainGameSceneSetupData = Resources.FindObjectsOfTypeAll<MainGameSceneSetupData>().FirstOrDefault();
+            // nicoco007's solution for determining whether to have transparent walls in the HMD view.
+            StandardLevelSceneSetupDataSO levelSetup = Resources.FindObjectsOfTypeAll<StandardLevelSceneSetupDataSO>().FirstOrDefault();
 
             Camera mainCamera = FindObjectsOfType<Camera>().FirstOrDefault(x => x.CompareTag("MainCamera"));
-            if (Plugin.IsHMDOn && !mainGameSceneSetupData.gameplayOptions.validForScoreUse)
+            if (Plugin.IsHMDOn && levelSetup.gameplayCoreSetupData.gameplayModifiers.noFail)
                 mainCamera.cullingMask &= ~(1 << WallLayer);
             else
                 mainCamera.cullingMask |= (1 << WallLayer);
@@ -99,6 +117,10 @@ namespace TransparentWall
         {
             try
             {
+                if (_livObject == null)
+                {
+                    CullLiv();
+                }
                 StretchableObstacle _stretchableObstacle = ReflectionUtil.GetPrivateField<StretchableObstacle>(obstacleController, "_stretchableObstacle");
                 StretchableCube _stretchableCoreOutside = ReflectionUtil.GetPrivateField<StretchableCube>(_stretchableObstacle, "_stretchableCoreOutside");
                 StretchableCube _stretchableCoreInside = ReflectionUtil.GetPrivateField<StretchableCube>(_stretchableObstacle, "_stretchableCoreInside");

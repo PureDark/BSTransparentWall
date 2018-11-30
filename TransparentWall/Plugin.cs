@@ -18,7 +18,7 @@ namespace TransparentWall
         public string Version => VersionNum;
         public string[] Filter { get; }
 
-        private static AsyncScenesLoader loader;
+        GameScenesManager gameScenesManager;
 
         public const string KeyTranparentWall = "TransparentWall";
         public const string KeyHMD = "HMD";
@@ -113,16 +113,19 @@ namespace TransparentWall
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene scene)
         {
-            if (scene.name == "StandardLevelLoader")
+            if (gameScenesManager == null)
             {
-                if (!loader)
-                    loader = Resources.FindObjectsOfTypeAll<AsyncScenesLoader>().FirstOrDefault();
-                loader.loadingDidFinishEvent += OnLoadingDidFinish;
+                gameScenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
+                if (gameScenesManager != null)
+                {
+                    gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
+                }
             }
         }
-        public void OnLoadingDidFinish()
+        public void OnTransitionDidFinish()
         {
-            new GameObject("TransparentWall").AddComponent<TransparentWall>();
+            if (SceneManager.GetActiveScene().name == "GameCore")
+                new GameObject("TransparentWall").AddComponent<TransparentWall>();
         }
 
     public void OnLateUpdate()

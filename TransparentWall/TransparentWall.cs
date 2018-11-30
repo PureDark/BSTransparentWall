@@ -56,10 +56,11 @@ namespace TransparentWall
         {
             yield return new WaitForEndOfFrame();
 
-            var mainGameSceneSetupData = Resources.FindObjectsOfTypeAll<MainGameSceneSetupData>().FirstOrDefault();
+            StandardLevelSceneSetupDataSO levelSetup = Resources.FindObjectsOfTypeAll<StandardLevelSceneSetupDataSO>().FirstOrDefault();
 
             Camera mainCamera = FindObjectsOfType<Camera>().FirstOrDefault(x => x.CompareTag("MainCamera"));
-            if (Plugin.IsHMDOn && !mainGameSceneSetupData.gameplayOptions.validForScoreUse)
+
+            if (Plugin.IsHMDOn && levelSetup.gameplayCoreSetupData.gameplayModifiers.noFail)
                 mainCamera.cullingMask &= ~(1 << WallLayer);
             else
                 mainCamera.cullingMask |= (1 << WallLayer);

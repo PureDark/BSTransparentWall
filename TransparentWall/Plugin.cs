@@ -12,13 +12,13 @@ namespace TransparentWall
     class Plugin : IEnhancedPlugin, IPlugin
     {
         public static string PluginName = "TransparentWall";
-        public const string VersionNum = "0.2.2-LIV";
+        public const string VersionNum = "0.1.1";
 
         public string Name => PluginName;
         public string Version => VersionNum;
         public string[] Filter { get; }
 
-        GameScenesManager gameScenesManager;
+        private GameScenesManager _scenesManager;
 
         public const string KeyTranparentWall = "TransparentWall";
         public const string KeyHMD = "HMD";
@@ -109,18 +109,18 @@ namespace TransparentWall
         public void OnApplicationQuit()
         {
             SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
-            if (gameScenesManager != null)
-                gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
+            if (_scenesManager != null)
+                _scenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
         }
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene scene)
         {
-            if (gameScenesManager == null)
+            if (_scenesManager == null)
             {
-                gameScenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
-                if (gameScenesManager != null)
+                _scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
+                if (_scenesManager != null)
                 {
-                    gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
+                    _scenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
                 }
             }
         }

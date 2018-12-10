@@ -56,7 +56,7 @@ namespace TransparentWall
         }
 
         /// <summary>
-        /// Attempts to find the MixedRealityRender and apply the layer mask to the LIV output.
+        /// Attempts to find the LIV.SDK.Unity.LIV object and apply the layer mask to the LIV output.
         /// </summary>
         public void CullLiv()
         {
@@ -80,10 +80,10 @@ namespace TransparentWall
         {
             yield return new WaitForEndOfFrame();
 
-            // nicoco007's solution for determining whether to have transparent walls in the HMD view.
             StandardLevelSceneSetupDataSO levelSetup = Resources.FindObjectsOfTypeAll<StandardLevelSceneSetupDataSO>().FirstOrDefault();
 
             Camera mainCamera = FindObjectsOfType<Camera>().FirstOrDefault(x => x.CompareTag("MainCamera"));
+
             if (Plugin.IsHMDOn && levelSetup.gameplayCoreSetupData.gameplayModifiers.noFail)
                 mainCamera.cullingMask &= ~(1 << WallLayer);
             else

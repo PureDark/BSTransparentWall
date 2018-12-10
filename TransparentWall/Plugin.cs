@@ -110,7 +110,7 @@ namespace TransparentWall
         {
             SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
             if (_scenesManager != null)
-                _scenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
+                _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
         }
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene scene)
@@ -120,11 +120,12 @@ namespace TransparentWall
                 _scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
                 if (_scenesManager != null)
                 {
-                    _scenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
+                    _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
                 }
             }
         }
-        public void OnTransitionDidFinish()
+
+        private void SceneTransitionDidFinish()
         {
             if (SceneManager.GetActiveScene().name == "GameCore")
                 new GameObject("TransparentWall").AddComponent<TransparentWall>();

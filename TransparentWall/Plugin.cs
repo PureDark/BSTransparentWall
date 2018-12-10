@@ -120,9 +120,7 @@ namespace TransparentWall
                 _scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
 
                 if (_scenesManager != null)
-                {
                     _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
-                }
             }
         }
 

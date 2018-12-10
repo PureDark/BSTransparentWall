@@ -8,10 +8,12 @@ namespace TransparentWall
     public class TransparentWall : MonoBehaviour
     {
         public static int WallLayer = 25;
+        public static int MoveBackLayer = 27;
         public static string LIVCam_Name = "MainCamera";
 
         private BeatmapObjectSpawnController _beatmapObjectSpawnController;
-        private LIV.SDK.Unity.LIV _livObject;
+        private LIV.SDK.Unity.LIV _livObject = null;
+        private MoveBackWall _moveBackWall;
 
         private void Start()
         {
@@ -21,6 +23,11 @@ namespace TransparentWall
             {
                 if (Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().Count() > 0)
                     this._beatmapObjectSpawnController = Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().First();
+                if (Resources.FindObjectsOfTypeAll<MoveBackWall>().Count() > 0)
+                {
+                    this._moveBackWall = Resources.FindObjectsOfTypeAll<MoveBackWall>().First();
+                    MoveBackLayer = _moveBackWall.gameObject.layer;
+                }
 
                 if (_beatmapObjectSpawnController != null)
                 {
@@ -44,7 +51,7 @@ namespace TransparentWall
         }
         private void setupCams()
         {
-            CullLiv(); // Probably pointless to do it here, but why not
+            CullLiv();
             StartCoroutine(setupCamerasCoroutine());
         }
 
@@ -55,15 +62,15 @@ namespace TransparentWall
         {
             if (Plugin.IsLIVCameraOn)
             {
-                LIV.SDK.Unity.LIV _liv = null;
-                LIV.SDK.Unity.MixedRealityRender mxdR = UnityEngine.Object.FindObjectOfType<LIV.SDK.Unity.MixedRealityRender>();
-                if (mxdR != null)
+                if (_livObject == null)
+                    _livObject = LIV.SDK.Unity.LIV.FindObjectOfType<LIV.SDK.Unity.LIV>();
+
+                if (_livObject != null)
                 {
-                    _liv = ReflectionUtil.GetPrivateField<LIV.SDK.Unity.LIV>(mxdR, "_liv");
-                    if (_liv.name == LIVCam_Name)
+                    if (_livObject.name == LIVCam_Name)
                     {
-                        _livObject = _liv;
                         _livObject.SpectatorLayerMask &= ~(1 << WallLayer);
+                        _livObject.SpectatorLayerMask &= ~(1 << MoveBackLayer);
                     }
                 }
             }

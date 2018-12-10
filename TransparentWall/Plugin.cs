@@ -109,6 +109,8 @@ namespace TransparentWall
         public void OnApplicationQuit()
         {
             SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
+            if (gameScenesManager != null)
+                gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
         }
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene scene)
@@ -128,7 +130,7 @@ namespace TransparentWall
                 new GameObject("TransparentWall").AddComponent<TransparentWall>();
         }
 
-    public void OnLateUpdate()
+        public void OnLateUpdate()
         {
         }
 

@@ -12,7 +12,7 @@ namespace TransparentWall
     class Plugin : IEnhancedPlugin, IPlugin
     {
         public static string PluginName = "TransparentWall";
-        public const string VersionNum = "0.1.1";
+        public const string VersionNum = "0.2.2-LIV";
 
         public string Name => PluginName;
         public string Version => VersionNum;

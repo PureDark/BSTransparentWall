@@ -108,9 +108,15 @@ namespace TransparentWall
                     if (cam != null)
                     {
                         if (((plugin.Name == "CameraPlus" || plugin.Name == "CameraPlusOrbitEdition") && Plugin.IsCameraPlusOn) || (plugin.Name == "DynamicCamera" && Plugin.IsDynamicCameraOn))
+                        {
                             cam.cullingMask &= ~(1 << WallLayer);
+                            cam.cullingMask &= ~(1 << MoveBackLayer);
+                        }
                         else
+                        {
                             cam.cullingMask |= (1 << WallLayer);
+                            cam.cullingMask |= ~(1 << MoveBackLayer);
+                        }
                     }
                     Camera multi = ReflectionUtil.GetPrivateField<Camera>(_cameraPlus, "multi");
                     if (multi != null)

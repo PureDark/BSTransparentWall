@@ -82,7 +82,7 @@ namespace TransparentWall
 
             StandardLevelSceneSetupDataSO levelSetup = Resources.FindObjectsOfTypeAll<StandardLevelSceneSetupDataSO>().FirstOrDefault();
 
-            Camera mainCamera = FindObjectsOfType<Camera>().FirstOrDefault(x => x.CompareTag("MainCamera"));
+            Camera mainCamera = Camera.main;
 
             if (Plugin.IsHMDOn && levelSetup.gameplayCoreSetupData.gameplayModifiers.noFail)
                 mainCamera.cullingMask &= ~(1 << WallLayer);
@@ -99,7 +99,12 @@ namespace TransparentWall
                         yield return new WaitForEndOfFrame();
                         _cameraPlus = ReflectionUtil.GetPrivateField<MonoBehaviour>(plugin, "_cameraPlus");
                     }
-                    Camera cam = ReflectionUtil.GetPrivateField<Camera>(_cameraPlus, "_cam");
+                    Camera cam = null;
+                    while (cam == null) // Camera is null on the first attempt.
+                    {
+                        yield return new WaitForEndOfFrame();
+                        cam = GameObject.FindObjectsOfType<Camera>().Where(c => c.name == "Camera Plus").FirstOrDefault();
+                    }
                     if (cam != null)
                     {
                         if (((plugin.Name == "CameraPlus" || plugin.Name == "CameraPlusOrbitEdition") && Plugin.IsCameraPlusOn) || (plugin.Name == "DynamicCamera" && Plugin.IsDynamicCameraOn))

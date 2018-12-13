@@ -66,4 +66,4 @@
     <PostBuildEvent>copy ".\TransparentWall.dll" "F:\SteamLibrary\SteamApps\common\Beat Saber\Plugins"
 Start steam://rungameid/620980</PostBuildEvent>
   </PropertyGroup>
-</Project>
+</Project> 

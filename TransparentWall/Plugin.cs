@@ -109,6 +109,8 @@ namespace TransparentWall
         public void OnApplicationQuit()
         {
             SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
+            if (_scenesManager != null)
+                _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
         }
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene scene)

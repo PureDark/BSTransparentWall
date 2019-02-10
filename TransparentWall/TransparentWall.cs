@@ -78,6 +78,17 @@ namespace TransparentWall
                 Console.WriteLine($"[TransparentWall] {ex.Message}\n{ex.StackTrace}");
             }
         }
+        
+        public static void addExcludedCam(string exCam)
+        {
+            if (_excludedCams == null)
+                _excludedCams = new List<string>();
+            _excludedCams.Add(exCam.ToLower().Trim());
+        }
+        public static void addExcludedCams(IEnumerable<string> exCams)
+        {
+            exCams.ToList().ForEach(c => addExcludedCam(c));
+        }
 
         public virtual void HandleObstacleDiStartMovementEvent(BeatmapObjectSpawnController obstacleSpawnController, ObstacleController obstacleController)
         {

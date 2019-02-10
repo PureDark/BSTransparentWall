@@ -74,7 +74,12 @@ namespace TransparentWall
                     if (_excludedCams.Contains(c.name.ToLower()))
                         LayersToMask.ForEach(i => { c.cullingMask |= (1 << i); });
                     else
-                        LayersToMask.ForEach(i => { c.cullingMask &= ~(1 << i); });
+                    {
+                        if (Plugin.IsCameraPlusOn)
+                            LayersToMask.ForEach(i => { c.cullingMask &= ~(1 << i); });
+                        else
+                            LayersToMask.ForEach(i => { c.cullingMask |= (1 << i); });
+                    }
                 });
             }
             catch (Exception ex)

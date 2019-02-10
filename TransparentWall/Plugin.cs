@@ -90,7 +90,6 @@ namespace TransparentWall
         public void OnApplicationStart()
         {
             CheckForUserDataFolder();
-            TransparentWall.addExcludedCams(ExcludedCams);
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
         }
 

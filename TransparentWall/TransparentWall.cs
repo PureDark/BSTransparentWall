@@ -10,7 +10,7 @@ namespace TransparentWall
         public static int WallLayer = 25;
         public static int MoveBackLayer = 27;
         public static string LIVCam_Name = "MainCamera";
-        private static List<string> _excludedCams = new List<string>();
+        private static List<string> _excludedCams = Plugin.ExcludedCams;
         public static List<int> LayersToMask = new List<int> { WallLayer, MoveBackLayer };
         public static List<string> livNames = new List<string> { "MenuMainCamera", "MainCamera", "LIV Camera" };
 
@@ -48,6 +48,7 @@ namespace TransparentWall
         }
         private void setupCams()
         {
+            _excludedCams = Plugin.ExcludedCams;
             StartCoroutine(setupCamerasCoroutine());
         }
 

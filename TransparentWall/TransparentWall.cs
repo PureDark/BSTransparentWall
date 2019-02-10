@@ -67,10 +67,14 @@ namespace TransparentWall
             try
             {
                 LIV.SDK.Unity.LIV.FindObjectsOfType<LIV.SDK.Unity.LIV>().Where(x => livNames.Contains(x.name)).ToList().ForEach(l => {
-                    LayersToMask.ForEach(i => { l.SpectatorLayerMask &= ~(1 << i); });
+                    if(Plugin.IsLIVCameraOn)
+                        LayersToMask.ForEach(i => { l.SpectatorLayerMask &= ~(1 << i); });
                 });
-                GameObject.FindObjectsOfType<Camera>().Where(c => (c.name.ToLower().EndsWith(".cfg") && !_excludedCams.Contains(c.name.ToLower()))).ToList().ForEach(c => {
-                    LayersToMask.ForEach(i => { c.cullingMask &= ~(1 << i); });
+                GameObject.FindObjectsOfType<Camera>().Where(c => (c.name.ToLower().EndsWith(".cfg"))).ToList().ForEach(c => {
+                    if (_excludedCams.Contains(c.name.ToLower()))
+                        LayersToMask.ForEach(i => { c.cullingMask |= (1 << i); });
+                    else
+                        LayersToMask.ForEach(i => { c.cullingMask &= ~(1 << i); });
                 });
             }
             catch (Exception ex)

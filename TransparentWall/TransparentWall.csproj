@@ -63,6 +63,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy ".\TransparentWall.dll" "H:\SteamApps\SteamApps\common\Beat Saber\Plugins"</PostBuildEvent>
+    <PostBuildEvent>copy ".\TransparentWall.dll" "F:\SteamLibrary\SteamApps\common\Beat Saber\Plugins"
+Start steam://rungameid/620980</PostBuildEvent>
   </PropertyGroup>
-</Project>
+</Project> 

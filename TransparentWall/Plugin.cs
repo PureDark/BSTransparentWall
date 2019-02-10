@@ -78,9 +78,7 @@ namespace TransparentWall
         {
             get
             {
-                string iniSetting = ModPrefs.GetString(Plugin.PluginName, KeyExcludedCams, "");
-
-                return iniSetting.Split(',').ToList();
+                return ModPrefs.GetString(Plugin.PluginName, KeyExcludedCams, "").Split(',').ToList().Select(c => c.ToLower().Trim()).ToList();
             }
             set
             {

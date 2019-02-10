@@ -12,7 +12,7 @@ namespace TransparentWall
     class Plugin : IEnhancedPlugin, IPlugin
     {
         public static string PluginName = "TransparentWall";
-        public const string VersionNum = "0.2.3-Z";
+        public const string VersionNum = "0.2.1";
 
         public string Name => PluginName;
         public string Version => VersionNum;
@@ -23,9 +23,8 @@ namespace TransparentWall
         public const string KeyTranparentWall = "TransparentWall";
         public const string KeyHMD = "HMD";
         public const string KeyCameraPlus = "CameraPlus";
-        public const string KeyMutiView = "MutiViewFirstPerson";
-        public const string KeyDynamicCamera = "DynamicCamera";
         public const string KeyLIV = "LIVCamera";
+        public const string KeyExcludedCams = "ExcludedCamPlusCams";
 
         public static bool IsTranparentWall
         {
@@ -63,30 +62,6 @@ namespace TransparentWall
             }
         }
 
-        public static bool IsMutiViewFirstPersonOn
-        {
-            get
-            {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyMutiView, true);
-            }
-            set
-            {
-                ModPrefs.SetBool(Plugin.PluginName, KeyMutiView, value);
-            }
-        }
-
-        public static bool IsDynamicCameraOn
-        {
-            get
-            {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyDynamicCamera, true);
-            }
-            set
-            {
-                ModPrefs.SetBool(Plugin.PluginName, KeyDynamicCamera, value);
-            }
-        }
-
         public static bool IsLIVCameraOn
         {
             get
@@ -99,10 +74,25 @@ namespace TransparentWall
             }
         }
 
+        public static List<string> ExcludedCams
+        {
+            get
+            {
+                string iniSetting = ModPrefs.GetString(Plugin.PluginName, KeyExcludedCams, "");
+
+                return iniSetting.Split(',').ToList();
+            }
+            set
+            {
+                ModPrefs.SetString(Plugin.PluginName, KeyExcludedCams, string.Join(",", value));
+            }
+        }
+
 
         public void OnApplicationStart()
         {
             CheckForUserDataFolder();
+            TransparentWall.addExcludedCams(ExcludedCams);
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
         }
 
@@ -169,17 +159,13 @@ namespace TransparentWall
             {
                 ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyCameraPlus, true);
             }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyMutiView, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyMutiView, true);
-            }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyDynamicCamera, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyDynamicCamera, true);
-            }
             if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyLIV, "")))
             {
                 ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyLIV, true);
+            }
+            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyExcludedCams, "")))
+            {
+                ModPrefs.SetString(Plugin.PluginName, Plugin.KeyExcludedCams, "");
             }
         }
     }

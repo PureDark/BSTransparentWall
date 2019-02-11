@@ -10,10 +10,11 @@ namespace TransparentWall
         public static int WallLayer = 25;
         public static int MoveBackLayer = 27;
         public static string LIVCam_Name = "MainCamera";
+        private static List<string> _excludedCams = Plugin.ExcludedCams;
+        public static List<int> LayersToMask = new List<int> { WallLayer, MoveBackLayer };
+        public static List<string> livNames = new List<string> { "MenuMainCamera", "MainCamera", "LIV Camera" };
 
         private BeatmapObjectSpawnController _beatmapObjectSpawnController;
-        private LIV.SDK.Unity.LIV _livObject = null;
-        private MoveBackWall _moveBackWall;
 
         private void Start()
         {
@@ -24,11 +25,7 @@ namespace TransparentWall
                 if (Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().Count() > 0)
                     this._beatmapObjectSpawnController = Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().First();
                 if (Resources.FindObjectsOfTypeAll<MoveBackWall>().Count() > 0)
-                {
-                    this._moveBackWall = Resources.FindObjectsOfTypeAll<MoveBackWall>().First();
-                    MoveBackLayer = _moveBackWall.gameObject.layer;
-                }
-
+                    MoveBackLayer = Resources.FindObjectsOfTypeAll<MoveBackWall>().First().gameObject.layer;
                 if (_beatmapObjectSpawnController != null)
                 {
                     _beatmapObjectSpawnController.obstacleDiStartMovementEvent += this.HandleObstacleDiStartMovementEvent;
@@ -51,29 +48,8 @@ namespace TransparentWall
         }
         private void setupCams()
         {
-            CullLiv();
+            _excludedCams = Plugin.ExcludedCams;
             StartCoroutine(setupCamerasCoroutine());
-        }
-
-        /// <summary>
-        /// Attempts to find the LIV.SDK.Unity.LIV object and apply the layer mask to the LIV output.
-        /// </summary>
-        public void CullLiv()
-        {
-            if (Plugin.IsLIVCameraOn)
-            {
-                if (_livObject == null)
-                    _livObject = LIV.SDK.Unity.LIV.FindObjectOfType<LIV.SDK.Unity.LIV>();
-
-                if (_livObject != null)
-                {
-                    if (_livObject.name == LIVCam_Name)
-                    {
-                        _livObject.SpectatorLayerMask &= ~(1 << WallLayer);
-                        _livObject.SpectatorLayerMask &= ~(1 << MoveBackLayer);
-                    }
-                }
-            }
         }
 
         private IEnumerator<WaitForEndOfFrame> setupCamerasCoroutine()
@@ -89,45 +65,27 @@ namespace TransparentWall
             else
                 mainCamera.cullingMask |= (1 << WallLayer);
 
-            foreach (var plugin in IllusionInjector.PluginManager.Plugins)
+            try
             {
-                if (plugin.Name == "CameraPlus" || plugin.Name == "CameraPlusOrbitEdition" || plugin.Name == "DynamicCamera")
-                {
-                    MonoBehaviour _cameraPlus = ReflectionUtil.GetPrivateField<MonoBehaviour>(plugin, "_cameraPlus");
-                    while (_cameraPlus == null)
+                LIV.SDK.Unity.LIV.FindObjectsOfType<LIV.SDK.Unity.LIV>().Where(x => livNames.Contains(x.name)).ToList().ForEach(l => {
+                    if(Plugin.IsLIVCameraOn)
+                        LayersToMask.ForEach(i => { l.SpectatorLayerMask &= ~(1 << i); });
+                });
+                GameObject.FindObjectsOfType<Camera>().Where(c => (c.name.ToLower().EndsWith(".cfg"))).ToList().ForEach(c => {
+                    if (_excludedCams.Contains(c.name.ToLower()))
+                        LayersToMask.ForEach(i => { c.cullingMask |= (1 << i); });
+                    else
                     {
-                        yield return new WaitForEndOfFrame();
-                        _cameraPlus = ReflectionUtil.GetPrivateField<MonoBehaviour>(plugin, "_cameraPlus");
-                    }
-                    Camera cam = null;
-                    while (cam == null) // Camera is null on the first attempt.
-                    {
-                        yield return new WaitForEndOfFrame();
-                        cam = GameObject.FindObjectsOfType<Camera>().Where(c => c.name == "Camera Plus").FirstOrDefault();
-                    }
-                    if (cam != null)
-                    {
-                        if (((plugin.Name == "CameraPlus" || plugin.Name == "CameraPlusOrbitEdition") && Plugin.IsCameraPlusOn) || (plugin.Name == "DynamicCamera" && Plugin.IsDynamicCameraOn))
-                        {
-                            cam.cullingMask &= ~(1 << WallLayer);
-                            cam.cullingMask &= ~(1 << MoveBackLayer);
-                        }
+                        if (Plugin.IsCameraPlusOn)
+                            LayersToMask.ForEach(i => { c.cullingMask &= ~(1 << i); });
                         else
-                        {
-                            cam.cullingMask |= (1 << WallLayer);
-                            cam.cullingMask |= ~(1 << MoveBackLayer);
-                        }
+                            LayersToMask.ForEach(i => { c.cullingMask |= (1 << i); });
                     }
-                    Camera multi = ReflectionUtil.GetPrivateField<Camera>(_cameraPlus, "multi");
-                    if (multi != null)
-                    {
-                        if (Plugin.IsMutiViewFirstPersonOn)
-                            multi.cullingMask &= ~(1 << WallLayer);
-                        else
-                            multi.cullingMask |= (1 << WallLayer);
-                    }
-                    break;
-                }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[TransparentWall] {ex.Message}\n{ex.StackTrace}");
             }
         }
 
@@ -135,10 +93,6 @@ namespace TransparentWall
         {
             try
             {
-                if (_livObject == null)
-                {
-                    CullLiv();
-                }
                 StretchableObstacle _stretchableObstacle = ReflectionUtil.GetPrivateField<StretchableObstacle>(obstacleController, "_stretchableObstacle");
                 StretchableCube _stretchableCoreOutside = ReflectionUtil.GetPrivateField<StretchableCube>(_stretchableObstacle, "_stretchableCoreOutside");
                 StretchableCube _stretchableCoreInside = ReflectionUtil.GetPrivateField<StretchableCube>(_stretchableObstacle, "_stretchableCoreInside");

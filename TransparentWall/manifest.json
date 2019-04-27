@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nike4613/ModSaber-MetadataFileSchema/master/Schema.json",
+  "author": "PureDark",
+  "description": "Makes the walls transparent",
+  "gameVersion": "0.13.2",
+  "id": "TransparentWall",
+  "name": "TransparentWall",
+  "version": "0.2.2",
+  "features": []
+}

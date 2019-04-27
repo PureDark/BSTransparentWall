@@ -1,15 +1,15 @@
-﻿using IllusionPlugin;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Collections.Generic;
+using IPA;
+using IPA.Config;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace TransparentWall
 {
-    class Plugin : IEnhancedPlugin, IPlugin
+    class Plugin : IBeatSaberPlugin
     {
         public static string PluginName = "TransparentWall";
         public const string VersionNum = "0.2.1";
@@ -117,15 +117,22 @@ namespace TransparentWall
                 new GameObject("TransparentWall").AddComponent<TransparentWall>();
         }
 
-        public void OnLateUpdate()
+        public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
         {
+            throw new NotImplementedException();
+        }
+
+        public void OnSceneUnloaded(Scene scene)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnActiveSceneChanged(Scene prevScene, Scene nextScene)
+        {
+            throw new NotImplementedException();
         }
 
         public void OnLevelWasLoaded(int level)
-        {
-        }
-
-        public void OnLevelWasInitialized(int level)
         {
         }
 

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TransparentWall</RootNamespace>
     <AssemblyName>TransparentWall</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -34,13 +34,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\SteamLibrary\SteamApps\common\Beat Saber\Beat Saber_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>E:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="IllusionInjector">
-      <HintPath>..\..\..\SteamLibrary\SteamApps\common\Beat Saber\Beat Saber_Data\Managed\IllusionInjector.dll</HintPath>
+    <Reference Include="BS_Utils">
+      <HintPath>E:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\BS_Utils.dll</HintPath>
     </Reference>
-    <Reference Include="IllusionPlugin">
-      <HintPath>..\..\..\SteamLibrary\SteamApps\common\Beat Saber\Beat Saber_Data\Managed\IllusionPlugin.dll</HintPath>
+    <Reference Include="IPA.Loader">
+      <HintPath>E:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -49,10 +49,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\SteamLibrary\SteamApps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>E:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\SteamLibrary\SteamApps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>E:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -61,9 +61,16 @@
     <Compile Include="ReflectionUtil.cs" />
     <Compile Include="TransparentWall.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="manifest.json" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy ".\TransparentWall.dll" "F:\SteamLibrary\SteamApps\common\Beat Saber\Plugins"
-Start steam://rungameid/620980</PostBuildEvent>
+    <PostBuildEvent>copy ".\TransparentWall.dll" "E:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins"</PostBuildEvent>
   </PropertyGroup>
-</Project> 
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties manifest_1json__JsonSchema="https://github.com/beat-saber-modding-group/BSIPA-MetadataFileSchema/master/Schema.json" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

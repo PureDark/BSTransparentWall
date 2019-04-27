@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using IPA;
 using IPA.Config;
+using IPA.Utilities;
+using IPALogger = IPA.Logging.Logger;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,19 +13,15 @@ namespace TransparentWall
     class Plugin : IBeatSaberPlugin
     {
         public static string PluginName = "TransparentWall";
-        public const string VersionNum = "0.2.1";
 
-        public string Name => PluginName;
-        public string Version => VersionNum;
-        public string[] Filter { get; }
+        internal static Ref<PluginConfig> config;
+        internal static IConfigProvider configProvider;
 
         private GameScenesManager _scenesManager;
 
         public const string KeyTranparentWall = "TransparentWall";
         public const string KeyHMD = "HMD";
-        public const string KeyCameraPlus = "CameraPlus";
         public const string KeyLIV = "LIVCamera";
-        public const string KeyExcludedCams = "ExcludedCamPlusCams";
 
         public static bool IsTranparentWall
         {
@@ -50,18 +47,6 @@ namespace TransparentWall
             }
         }
 
-        public static bool IsCameraPlusOn
-        {
-            get
-            {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyCameraPlus, true);
-            }
-            set
-            {
-                ModPrefs.SetBool(Plugin.PluginName, KeyCameraPlus, value);
-            }
-        }
-
         public static bool IsLIVCameraOn
         {
             get
@@ -73,19 +58,6 @@ namespace TransparentWall
                 ModPrefs.SetBool(Plugin.PluginName, KeyLIV, value);
             }
         }
-
-        public static List<string> ExcludedCams
-        {
-            get
-            {
-                return ModPrefs.GetString(Plugin.PluginName, KeyExcludedCams, "").Split(',').ToList().Select(c => c.ToLower().Trim()).ToList();
-            }
-            set
-            {
-                ModPrefs.SetString(Plugin.PluginName, KeyExcludedCams, string.Join(",", value));
-            }
-        }
-
 
         public void OnApplicationStart()
         {
@@ -159,18 +131,26 @@ namespace TransparentWall
             {
                 ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyHMD, true);
             }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyCameraPlus, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyCameraPlus, true);
-            }
             if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyLIV, "")))
             {
                 ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyLIV, true);
             }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyExcludedCams, "")))
+        }
+
+        public void Init(IPALogger logger, [Config.Prefer("json")] IConfigProvider cfgProvider)
+        {
+            Logger.log = logger;
+            Logger.log.Debug("Logger prepared");
+
+            configProvider = cfgProvider;
+            config = cfgProvider.MakeLink<PluginConfig>((p, v) =>
             {
-                ModPrefs.SetString(Plugin.PluginName, Plugin.KeyExcludedCams, "");
-            }
+                if (v.Value == null || v.Value.RegenerateConfig || v.Value == null && v.Value.RegenerateConfig)
+                {
+                    p.Store(v.Value = new PluginConfig() { RegenerateConfig = false });
+                }
+                config = v;
+            });
         }
     }
 }

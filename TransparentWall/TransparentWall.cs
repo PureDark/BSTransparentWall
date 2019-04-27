@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using BS_Utils.Gameplay;
 using UnityEngine;
 
@@ -11,7 +11,6 @@ namespace TransparentWall
         public static int WallLayer = 25;
         public static int MoveBackLayer = 27;
         public static string LIVCam_Name = "MainCamera";
-        private static List<string> _excludedCams = Plugin.ExcludedCams;
         public static List<int> LayersToMask = new List<int> { WallLayer, MoveBackLayer };
         public static List<string> livNames = new List<string> { "MenuMainCamera", "MainCamera", "LIV Camera" };
 
@@ -20,7 +19,9 @@ namespace TransparentWall
         private void Start()
         {
             if (!Plugin.IsTranparentWall)
+            {
                 return;
+            }
             try
             {
                 if (Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().Count() > 0)
@@ -42,7 +43,7 @@ namespace TransparentWall
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message + "\n" + ex.StackTrace);
+                Logger.log.Error($"TransparentWall.Start() has thrown an exception: {ex.Message}\n{ex.StackTrace}");
             }
         }
 
@@ -55,7 +56,6 @@ namespace TransparentWall
         }
         private void setupCams()
         {
-            _excludedCams = Plugin.ExcludedCams;
             StartCoroutine(setupCamerasCoroutine());
         }
 
@@ -86,28 +86,10 @@ namespace TransparentWall
                         LayersToMask.ForEach(i => { l.SpectatorLayerMask &= ~(1 << i); });
                     }
                 });
-                GameObject.FindObjectsOfType<Camera>().Where(c => (c.name.ToLower().EndsWith(".cfg"))).ToList().ForEach(c =>
-                {
-                    if (_excludedCams.Contains(c.name.ToLower()))
-                    {
-                        LayersToMask.ForEach(i => { c.cullingMask |= (1 << i); });
-                    }
-                    else
-                    {
-                        if (Plugin.IsCameraPlusOn)
-                        {
-                            LayersToMask.ForEach(i => { c.cullingMask &= ~(1 << i); });
-                        }
-                        else
-                        {
-                            LayersToMask.ForEach(i => { c.cullingMask |= (1 << i); });
-                        }
-                    }
-                });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[TransparentWall] {ex.Message}\n{ex.StackTrace}");
+                Logger.log.Error($"TransparentWall.setupCamerasCoroutine() has thrown an exception: {ex.Message}\n{ex.StackTrace}");
             }
         }
 
@@ -122,7 +104,7 @@ namespace TransparentWall
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message + "\n" + ex.StackTrace);
+                Logger.log.Error($"TransparentWall.HandleObstacleDiStartMovementEvent(BeatmapObjectSpawnController, ObstacleController) has thrown an exception: {ex.Message}\n{ex.StackTrace}");
             }
         }
     }

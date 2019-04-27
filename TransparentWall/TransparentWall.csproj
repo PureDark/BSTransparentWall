@@ -36,6 +36,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>E:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="BeatSaberCustomUI">
+      <HintPath>E:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\BeatSaberCustomUI.dll</HintPath>
+    </Reference>
     <Reference Include="BS_Utils">
       <HintPath>E:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\BS_Utils.dll</HintPath>
     </Reference>
@@ -54,6 +57,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InGameSettingsUI.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="PluginConfig.cs" />
@@ -63,6 +67,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\icetransparent.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

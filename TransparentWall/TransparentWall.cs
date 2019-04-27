@@ -19,6 +19,8 @@ namespace TransparentWall
         {
             if (!Plugin.IsAnythingOn)
             {
+                Logger.log.Debug("Nothing is turned on!");
+                EnableScore();
                 return;
             }
 
@@ -68,11 +70,12 @@ namespace TransparentWall
 
             if (Plugin.IsHMDOn)
             {
-                ScoreSubmission.DisableSubmission("TransparentWall");
+                DisableScore();
                 mainCamera.cullingMask &= ~(1 << WallLayer);
             }
             else
             {
+                EnableScore();
                 mainCamera.cullingMask |= (1 << WallLayer);
             }
 
@@ -80,7 +83,7 @@ namespace TransparentWall
             {
                 LIV.SDK.Unity.LIV.FindObjectsOfType<LIV.SDK.Unity.LIV>().Where(x => livNames.Contains(x.name)).ToList().ForEach(l =>
                 {
-                    if (Plugin.IsLIVCameraOn)
+                    if (Plugin.IsDisableInLIVCamera)
                     {
                         LayersToMask.ForEach(i => { l.SpectatorLayerMask &= ~(1 << i); });
                     }
@@ -104,6 +107,26 @@ namespace TransparentWall
             catch (Exception ex)
             {
                 Logger.log.Error($"TransparentWall.HandleObstacleDiStartMovementEvent(BeatmapObjectSpawnController, ObstacleController) has thrown an exception: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        private void DisableScore()
+        {
+            if (!Plugin.isScoreDisabled)
+            {
+                Logger.log.Notice("TransparentWall is enabled in HMD. ScoreSubmission has been disabled.");
+                ScoreSubmission.ProlongedDisableSubmission("TransparentWall");
+                Plugin.isScoreDisabled = true;
+            }
+        }
+
+        private void EnableScore()
+        {
+            if (Plugin.isScoreDisabled)
+            {
+                Logger.log.Notice("TransparentWall is disabled in HMD. ScoreSubmission has been re-enabled.");
+                ScoreSubmission.RemoveProlongedDisable("TransparentWall");
+                Plugin.isScoreDisabled = false;
             }
         }
     }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using IPA;
 using IPA.Config;
 using IPA.Utilities;
@@ -19,19 +17,11 @@ namespace TransparentWall
 
         private GameScenesManager _scenesManager;
 
-        public const string KeyTranparentWall = "TransparentWall";
-        public const string KeyHMD = "HMD";
-        public const string KeyLIV = "LIVCamera";
-
-        public static bool IsTranparentWall
+        public static bool IsAnythingOn
         {
             get
             {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyTranparentWall, false);
-            }
-            set
-            {
-                ModPrefs.SetBool(Plugin.PluginName, KeyTranparentWall, value);
+                return (Plugin.IsHMDOn || Plugin.IsLIVCameraOn);
             }
         }
 
@@ -39,11 +29,11 @@ namespace TransparentWall
         {
             get
             {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyHMD, true);
+                return config.Value.HMD;
             }
             set
             {
-                ModPrefs.SetBool(Plugin.PluginName, KeyHMD, value);
+                config.Value.HMD = value;
             }
         }
 
@@ -51,25 +41,30 @@ namespace TransparentWall
         {
             get
             {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyLIV, true);
+                return config.Value.IsLIVCameraOn;
             }
             set
             {
-                ModPrefs.SetBool(Plugin.PluginName, KeyLIV, value);
+                config.Value.IsLIVCameraOn = value;
             }
         }
 
         public void OnApplicationStart()
         {
-            CheckForUserDataFolder();
+            Logger.log.Debug("OnApplicationStart");
+
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
         }
 
         public void OnApplicationQuit()
         {
+            Logger.log.Debug("OnApplicationQuit");
+
             SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
             if (_scenesManager != null)
+            {
                 _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
+            }
         }
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene scene)
@@ -79,29 +74,30 @@ namespace TransparentWall
                 _scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
 
                 if (_scenesManager != null)
+                {
                     _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+                }
             }
         }
 
         private void SceneTransitionDidFinish()
         {
             if (SceneManager.GetActiveScene().name == "GameCore")
+            {
                 new GameObject("TransparentWall").AddComponent<TransparentWall>();
+            }
         }
 
         public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
         {
-            throw new NotImplementedException();
         }
 
         public void OnSceneUnloaded(Scene scene)
         {
-            throw new NotImplementedException();
         }
 
         public void OnActiveSceneChanged(Scene prevScene, Scene nextScene)
         {
-            throw new NotImplementedException();
         }
 
         public void OnLevelWasLoaded(int level)
@@ -114,27 +110,6 @@ namespace TransparentWall
 
         public void OnFixedUpdate()
         {
-        }
-
-        private void CheckForUserDataFolder()
-        {
-            string userDataPath = Environment.CurrentDirectory + "/UserData";
-            if (!Directory.Exists(userDataPath))
-            {
-                Directory.CreateDirectory(userDataPath);
-            }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyTranparentWall, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyTranparentWall, true);
-            }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyHMD, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyHMD, true);
-            }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyLIV, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyLIV, true);
-            }
         }
 
         public void Init(IPALogger logger, [Config.Prefer("json")] IConfigProvider cfgProvider)
@@ -151,6 +126,7 @@ namespace TransparentWall
                 }
                 config = v;
             });
+            Logger.log.Debug("Configuration loaded");
         }
     }
 }

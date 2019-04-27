@@ -10,7 +10,6 @@ namespace TransparentWall
     {
         public static int WallLayer = 25;
         public static int MoveBackLayer = 27;
-        public static string LIVCam_Name = "MainCamera";
         public static List<int> LayersToMask = new List<int> { WallLayer, MoveBackLayer };
         public static List<string> livNames = new List<string> { "MenuMainCamera", "MainCamera", "LIV Camera" };
 
@@ -18,10 +17,11 @@ namespace TransparentWall
 
         private void Start()
         {
-            if (!Plugin.IsTranparentWall)
+            if (!Plugin.IsAnythingOn)
             {
                 return;
             }
+
             try
             {
                 if (Resources.FindObjectsOfTypeAll<BeatmapObjectSpawnController>().Count() > 0)
@@ -54,6 +54,7 @@ namespace TransparentWall
                 _beatmapObjectSpawnController.obstacleDiStartMovementEvent -= this.HandleObstacleDiStartMovementEvent;
             }
         }
+
         private void setupCams()
         {
             StartCoroutine(setupCamerasCoroutine());
@@ -62,8 +63,6 @@ namespace TransparentWall
         private IEnumerator<WaitForEndOfFrame> setupCamerasCoroutine()
         {
             yield return new WaitForEndOfFrame();
-
-            LevelData levelSetup = new LevelData();
 
             Camera mainCamera = Camera.main;
 

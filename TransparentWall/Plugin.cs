@@ -11,6 +11,7 @@ namespace TransparentWall
     class Plugin : IBeatSaberPlugin
     {
         public static string PluginName = "TransparentWall";
+        public static bool isScoreDisabled = false;
 
         internal static Ref<PluginConfig> config;
         internal static IConfigProvider configProvider;
@@ -21,7 +22,7 @@ namespace TransparentWall
         {
             get
             {
-                return (Plugin.IsHMDOn || Plugin.IsLIVCameraOn);
+                return (Plugin.IsHMDOn || Plugin.IsDisableInLIVCamera);
             }
         }
 
@@ -34,18 +35,20 @@ namespace TransparentWall
             set
             {
                 config.Value.HMD = value;
+                configProvider.Store(config.Value);
             }
         }
 
-        public static bool IsLIVCameraOn
+        public static bool IsDisableInLIVCamera
         {
             get
             {
-                return config.Value.IsLIVCameraOn;
+                return config.Value.DisableInLIVCamera;
             }
             set
             {
-                config.Value.IsLIVCameraOn = value;
+                config.Value.DisableInLIVCamera = value;
+                configProvider.Store(config.Value);
             }
         }
 
@@ -84,23 +87,25 @@ namespace TransparentWall
         {
             if (SceneManager.GetActiveScene().name == "GameCore")
             {
-                new GameObject("TransparentWall").AddComponent<TransparentWall>();
+                new GameObject(Plugin.PluginName).AddComponent<TransparentWall>();
             }
-        }
-
-        public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
-        {
-        }
-
-        public void OnSceneUnloaded(Scene scene)
-        {
         }
 
         public void OnActiveSceneChanged(Scene prevScene, Scene nextScene)
         {
         }
 
-        public void OnLevelWasLoaded(int level)
+        public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
+        {
+            if (scene.name == "MenuCore")
+            {
+                InGameSettingsUI.CreateGameplaySetupMenu();
+                InGameSettingsUI.CreateSettingsMenu();
+                //InGameSettingsUI.CreateModMenuButton()
+            }
+        }
+
+        public void OnSceneUnloaded(Scene scene)
         {
         }
 

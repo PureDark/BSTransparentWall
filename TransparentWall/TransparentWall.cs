@@ -85,7 +85,7 @@ namespace TransparentWall
                 {
                     if (Plugin.IsDisableInLIVCamera)
                     {
-                        LayersToMask.ForEach(i => { l.SpectatorLayerMask &= ~(1 << i); });
+                        LayersToMask.ForEach(i => { l.SpectatorLayerMask |= (1 << i); });
                     }
                 });
             }

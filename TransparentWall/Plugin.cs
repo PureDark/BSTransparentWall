@@ -1,40 +1,28 @@
-﻿using IllusionPlugin;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
+using IPA;
+using IPA.Config;
+using IPA.Utilities;
+using IPALogger = IPA.Logging.Logger;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace TransparentWall
 {
-    class Plugin : IEnhancedPlugin, IPlugin
+    class Plugin : IBeatSaberPlugin
     {
         public static string PluginName = "TransparentWall";
-        public const string VersionNum = "0.2.1";
+        public static bool isScoreDisabled = false;
 
-        public string Name => PluginName;
-        public string Version => VersionNum;
-        public string[] Filter { get; }
+        internal static Ref<PluginConfig> config;
+        internal static IConfigProvider configProvider;
 
         private GameScenesManager _scenesManager;
 
-        public const string KeyTranparentWall = "TransparentWall";
-        public const string KeyHMD = "HMD";
-        public const string KeyCameraPlus = "CameraPlus";
-        public const string KeyLIV = "LIVCamera";
-        public const string KeyExcludedCams = "ExcludedCamPlusCams";
-
-        public static bool IsTranparentWall
+        public static bool IsAnythingOn
         {
             get
             {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyTranparentWall, false);
-            }
-            set
-            {
-                ModPrefs.SetBool(Plugin.PluginName, KeyTranparentWall, value);
+                return (Plugin.IsHMDOn || Plugin.IsDisableInLIVCamera);
             }
         }
 
@@ -42,62 +30,44 @@ namespace TransparentWall
         {
             get
             {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyHMD, true);
+                return config.Value.HMD;
             }
             set
             {
-                ModPrefs.SetBool(Plugin.PluginName, KeyHMD, value);
+                config.Value.HMD = value;
+                configProvider.Store(config.Value);
             }
         }
 
-        public static bool IsCameraPlusOn
+        public static bool IsDisableInLIVCamera
         {
             get
             {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyCameraPlus, true);
+                return config.Value.DisableInLIVCamera;
             }
             set
             {
-                ModPrefs.SetBool(Plugin.PluginName, KeyCameraPlus, value);
+                config.Value.DisableInLIVCamera = value;
+                configProvider.Store(config.Value);
             }
         }
-
-        public static bool IsLIVCameraOn
-        {
-            get
-            {
-                return ModPrefs.GetBool(Plugin.PluginName, KeyLIV, true);
-            }
-            set
-            {
-                ModPrefs.SetBool(Plugin.PluginName, KeyLIV, value);
-            }
-        }
-
-        public static List<string> ExcludedCams
-        {
-            get
-            {
-                return ModPrefs.GetString(Plugin.PluginName, KeyExcludedCams, "").Split(',').ToList().Select(c => c.ToLower().Trim()).ToList();
-            }
-            set
-            {
-                ModPrefs.SetString(Plugin.PluginName, KeyExcludedCams, string.Join(",", value));
-            }
-        }
-
 
         public void OnApplicationStart()
         {
-            CheckForUserDataFolder();
+            Logger.log.Debug("OnApplicationStart");
+
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
         }
 
         public void OnApplicationQuit()
         {
+            Logger.log.Debug("OnApplicationQuit");
+
             SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
             if (_scenesManager != null)
+            {
                 _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
+            }
         }
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene scene)
@@ -107,25 +77,35 @@ namespace TransparentWall
                 _scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
 
                 if (_scenesManager != null)
+                {
                     _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+                }
             }
         }
 
         private void SceneTransitionDidFinish()
         {
             if (SceneManager.GetActiveScene().name == "GameCore")
-                new GameObject("TransparentWall").AddComponent<TransparentWall>();
+            {
+                new GameObject(Plugin.PluginName).AddComponent<TransparentWall>();
+            }
         }
 
-        public void OnLateUpdate()
+        public void OnActiveSceneChanged(Scene prevScene, Scene nextScene)
         {
         }
 
-        public void OnLevelWasLoaded(int level)
+        public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
         {
+            if (scene.name == "MenuCore")
+            {
+                InGameSettingsUI.CreateGameplaySetupMenu();
+                InGameSettingsUI.CreateSettingsMenu();
+                //InGameSettingsUI.CreateModMenuButton()
+            }
         }
 
-        public void OnLevelWasInitialized(int level)
+        public void OnSceneUnloaded(Scene scene)
         {
         }
 
@@ -137,33 +117,21 @@ namespace TransparentWall
         {
         }
 
-        private void CheckForUserDataFolder()
+        public void Init(IPALogger logger, [Config.Prefer("json")] IConfigProvider cfgProvider)
         {
-            string userDataPath = Environment.CurrentDirectory + "/UserData";
-            if (!Directory.Exists(userDataPath))
+            Logger.log = logger;
+            Logger.log.Debug("Logger prepared");
+
+            configProvider = cfgProvider;
+            config = cfgProvider.MakeLink<PluginConfig>((p, v) =>
             {
-                Directory.CreateDirectory(userDataPath);
-            }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyTranparentWall, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyTranparentWall, true);
-            }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyHMD, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyHMD, true);
-            }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyCameraPlus, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyCameraPlus, true);
-            }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyLIV, "")))
-            {
-                ModPrefs.SetBool(Plugin.PluginName, Plugin.KeyLIV, true);
-            }
-            if ("".Equals(ModPrefs.GetString(Plugin.PluginName, Plugin.KeyExcludedCams, "")))
-            {
-                ModPrefs.SetString(Plugin.PluginName, Plugin.KeyExcludedCams, "");
-            }
+                if (v.Value == null || v.Value.RegenerateConfig || v.Value == null && v.Value.RegenerateConfig)
+                {
+                    p.Store(v.Value = new PluginConfig() { RegenerateConfig = false });
+                }
+                config = v;
+            });
+            Logger.log.Debug("Configuration loaded");
         }
     }
 }
